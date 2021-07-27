@@ -93,7 +93,8 @@ Page {
            setHandler('Key', function(val) {
                label1.text = val;
                keys = JSON.parse(val);
-               label2.text = keys[0];
+               label2.text = keys[0]['cred']['id'];
+               label3.text = keys[0]['code']['value'];
            });
 
            importModule('ykcon', function () {});
