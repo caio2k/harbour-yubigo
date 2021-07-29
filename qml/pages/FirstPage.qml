@@ -8,6 +8,12 @@ Page {
     property var keys
     property var refresh_issued
     property ListModel keysList: ListModel{}
+    property int editorStyle: TextEditor.UnderlineBackground
+
+    property var keyName;
+    property var secret;
+    property var hashAlgo: 'SHA1';
+    property var issuer: '';
 
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
@@ -37,12 +43,24 @@ Page {
 //                }
 //            }
             MenuItem {
+                text: qsTr("Add Key")
+                onClicked: {
+                    var obj = pageStack.push(newKeyDialog)
+                    obj.accepted.connect(function() {
+                        refresh_issued = true;
+                        python.call('ykcon.ykcon.writeKey', [keyName, secret, hashAlgo, issuer], function() {});
+                        python.getKeys();
+                    })
+                }
+            }
+            MenuItem {
                 text: qsTr("Reload")
                 onClicked: {
                     refresh_issued = true;
                     python.getKeys();
                 }
             }
+
         }
 
         // Tell SilicaFlickable the height of its content.
@@ -56,7 +74,7 @@ Page {
             width: page.width
             spacing: Theme.paddingLarge
             PageHeader {
-                title: qsTr("YUBIKEY OATH Keys")
+                title: qsTr("YUBIKEY OATH TOTP Keys")
             }
 
             ProgressBar {
@@ -74,12 +92,19 @@ Page {
                 //valueText: value
                 //label: "Progress"
                 Timer {
+                    id: refresh_timer
                     interval: 100
                     repeat: true
                     onTriggered: {
-                        codeElapsed.value = 100*((keys[0]['code']['valid_to'] - new Date().getTime()/1000)/ (keys[0]['code']['valid_to'] - keys[0]['code']['valid_from']));
-                        if (codeElapsed.value <= 0 && refresh_issued == false) {
-                            refresh_issued = true;
+                        try{
+                            codeElapsed.value = 100*((keys[0]['code']['valid_to'] - new Date().getTime()/1000)/ (keys[0]['code']['valid_to'] - keys[0]['code']['valid_from']));
+                            if (codeElapsed.value <= 0 && refresh_issued == false) {
+                                refresh_issued = true;
+                                python.getKeys();
+                        }
+                        } catch (e) {
+                            console.log('error?')
+                            codeElapsed = 0;
                             python.getKeys();
                         }
                     }
@@ -112,6 +137,7 @@ Page {
                         text: model.code['value']
                         color: Theme.secondaryHighlightColor
                         font.pixelSize: Theme.fontSizeSmall
+                        font.bold: true
                         wrapMode: Text.Wrap
                         width: parent.width * 1 / 4
                     }
@@ -137,14 +163,20 @@ Page {
        Component.onCompleted: {
            addImportPath(Qt.resolvedUrl('.'));
 
-           setHandler('Key', function(val) {
+           setHandler('keys', function(val) {
                //label1.text = val
                keysList.clear();
                keys = JSON.parse(val);
                for (var s_key in keys) {
                    keysList.append({'cred': keys[s_key]['cred'], 'code': keys[s_key]['code']})
                }
+               refresh_timer.start()
                refresh_issued = false
+           });
+
+           setHandler('no_key', function(val) {
+               //label1.text = val
+               refresh_timer.stop()
            });
 
            importModule('ykcon', function () {});
@@ -152,7 +184,6 @@ Page {
 
 
        function getKeys() {
-
            call('ykcon.ykcon.getKeys', [], function() {});
        }
 
@@ -167,4 +198,77 @@ Page {
            console.log('got message from python: ' + data);
        }
     }
+
+    Component {
+             id: newKeyDialog
+             Dialog {
+
+                 onAccepted: {
+                     keyName = nameField.text
+                     secret = secretField.text
+                     hashAlgo = cbxHashAlgo.currentItem.text
+                     issuer = issuerField.text
+                 }
+
+                 Column {
+                     id: column
+                     width: parent.width
+
+                     DialogHeader {
+                         id: header
+                         title: "Add OATH TOTP Key"
+                     }
+
+                     SectionHeader {
+                         text: "Credential details"
+                     }
+
+                     TextField {
+                         id: nameField
+                         focus: true
+                         label: "Name"
+                         EnterKey.iconSource: "image://theme/icon-m-enter-next"
+                         EnterKey.onClicked: secretField.focus = true
+
+                         backgroundStyle: page.editorStyle
+                     }
+
+                     TextField {
+                         id: secretField
+                         focus: true
+                         label: "Secret"
+                         EnterKey.iconSource: "image://theme/icon-m-enter-next"
+                         EnterKey.onClicked: issuerField.focus = true
+
+                         backgroundStyle: page.editorStyle
+                     }
+
+                     SectionHeader {
+                         text: "Advanced (optional)"
+                     }
+
+                     TextField {
+                         id: issuerField
+                         focus: true
+                         label: "Issuer"
+                         EnterKey.iconSource: "image://theme/icon-m-enter-close"
+                         EnterKey.onClicked: focus = false
+
+                         backgroundStyle: page.editorStyle
+                     }
+
+                     ComboBox {
+                         id: cbxHashAlgo
+                         label: "Hash Algorythm:"
+                         width: parent.width
+
+                         menu: ContextMenu {
+                             MenuItem { text: "SHA1" }
+                             MenuItem { text: "SHA256" }
+                             MenuItem { text: "SHA512" }
+                         }
+                     }
+                }
+            }
+        }
 }

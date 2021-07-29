@@ -19,7 +19,6 @@ SOURCES += src/harbour-yubigo.cpp
 DISTFILES += qml/harbour-yubigo.qml \
     qml/cover/CoverPage.qml \
     qml/pages/FirstPage.qml \
-    qml/pages/SecondPage.qml \
     qml/pages/ykcon.py \
     rpm/harbour-yubigo.changes.in \
     rpm/harbour-yubigo.changes.run.in \
