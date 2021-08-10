@@ -47,9 +47,7 @@ Page {
                 onClicked: {
                     var obj = pageStack.push(newKeyDialog)
                     obj.accepted.connect(function() {
-                        refresh_issued = true;
-                        python.call('ykcon.ykcon.writeKey', [keyName, secret, hashAlgo, issuer], function() {});
-                        python.getKeys();
+
                     })
                 }
             }
@@ -208,6 +206,8 @@ Page {
                      secret = secretField.text
                      hashAlgo = cbxHashAlgo.currentItem.text
                      issuer = issuerField.text
+
+                     pageStack.replace(newKeyDialog_page2)
                  }
 
                  Column {
@@ -217,6 +217,12 @@ Page {
                      DialogHeader {
                          id: header
                          title: "Add OATH TOTP Key"
+                     }
+
+                     Label {
+                         text: "Unplug YubiKey to see Keyboard!"
+                         color: Theme.secondaryHighlightColor
+                         font.pixelSize: Theme.fontSizeLarge
                      }
 
                      SectionHeader {
@@ -267,6 +273,28 @@ Page {
                              MenuItem { text: "SHA256" }
                              MenuItem { text: "SHA512" }
                          }
+                     }
+                }
+            }
+        }
+
+    Component {
+             id: newKeyDialog_page2
+             Dialog {
+
+                 onAccepted: {
+                     refresh_issued = true;
+                     python.call('ykcon.ykcon.writeKey', [keyName, secret, hashAlgo, issuer], function() {});
+                     python.getKeys();
+                 }
+
+                 Column {
+                     id: column
+                     width: parent.width
+
+                     DialogHeader {
+                         id: header
+                         title: "Plug Yubikey now and continue."
                      }
                 }
             }
