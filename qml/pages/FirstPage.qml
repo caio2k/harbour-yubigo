@@ -175,6 +175,7 @@ Page {
            setHandler('no_key', function(val) {
                //label1.text = val
                refresh_timer.stop()
+
            });
 
            importModule('ykcon', function () {});
