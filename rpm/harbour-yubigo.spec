@@ -18,7 +18,8 @@ Source0:    %{name}-%{version}.tar.bz2
 Source100:  harbour-yubigo.yaml
 Requires:   sailfishsilica-qt5 >= 0.10.9
 Requires:   pyotherside-qml-plugin-python3-qt5
-Requires:   pcsc-ccid
+# Requires:   pcsc-ccid
+Requires:   yubikey-manager
 BuildRequires:  pkgconfig(sailfishapp) >= 1.0.2
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Qml)
