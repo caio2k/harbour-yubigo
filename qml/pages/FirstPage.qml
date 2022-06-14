@@ -162,7 +162,6 @@ Page {
            addImportPath(Qt.resolvedUrl('.'));
 
            setHandler('keys', function(val) {
-               //label1.text = val
                keysList.clear();
                keys = JSON.parse(val);
                for (var s_key in keys) {
@@ -173,9 +172,7 @@ Page {
            });
 
            setHandler('no_key', function(val) {
-               //label1.text = val
                refresh_timer.stop()
-
            });
 
            importModule('ykcon', function () {});
@@ -210,11 +207,8 @@ Page {
                      issuer = issuerField.text
 
                      refresh_issued = true;
-                     python.call('ykcon.ykcon.writeKey', [keyName, secret, hashAlgo, issuer], function() {});
+                     python.call('ykcon.ykcon.deleteKey', [keyName, secret, hashAlgo, issuer], function() {});
                      python.getKeys();
-
-                     // pageStack.replace(newKeyDialog_page2)
-
                  }
 
                  Column {
@@ -226,8 +220,51 @@ Page {
                          title: "Add OATH TOTP Key"
                      }
 
-                     SectionHeader {
-                         text: "Credential details"
+                     Repeater {
+
+                         model: keysList
+
+                         Row {
+                             width: parent.width
+                             spacing: Theme.paddingMedium
+
+                             anchors {
+                                 left: parent.left
+                                 right: parent.right
+                                 margins: Theme.paddingLarge
+                             }
+
+                             Label {
+                                 text: model.cred['id']
+                                 color: Theme.secondaryHighlightColor
+                                 wrapMode: Text.Wrap
+                                 width: parent.width
+                             }
+                         }
+                     }
+                }
+            }
+        }
+
+
+    Component {
+             id: deleteKeyDialog
+             Dialog {
+
+                 onAccepted: {
+                     keyName = nameField.text
+                     refresh_issued = true;
+                     python.call('ykcon.ykcon.deleteKey', keyName, function() {});
+                     python.getKeys();
+                 }
+
+                 Column {
+                     id: column
+                     width: parent.width
+
+                     DialogHeader {
+                         id: header
+                         title: "Delete Key"
                      }
 
                      TextField {
@@ -278,28 +315,4 @@ Page {
                 }
             }
         }
-
-    /*
-    Component {
-             id: newKeyDialog_page2
-             Dialog {
-
-                 onAccepted: {
-                     refresh_issued = true;
-                     python.call('ykcon.ykcon.writeKey', [keyName, secret, hashAlgo, issuer], function() {});
-                     python.getKeys();
-                 }
-
-                 Column {
-                     id: column
-                     width: parent.width
-
-                     DialogHeader {
-                         id: header
-                         title: "Plug Yubikey now and continue."
-                     }
-                }
-            }
-        }
-    */
 }
