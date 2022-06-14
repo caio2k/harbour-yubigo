@@ -9,11 +9,12 @@ Page {
     property var refresh_issued
     property ListModel keysList: ListModel{}
     property int editorStyle: TextEditor.UnderlineBackground
+    property bool allow_deletion: false
 
-    property var keyName;
-    property var secret;
-    property string hashAlgo: 'SHA1';
-    property string issuer: '';
+    property var keyName
+    property var secret
+    property string hashAlgo: 'SHA1'
+    property string issuer: ''
 
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
@@ -50,6 +51,13 @@ Page {
         // PullDownMenu and PushUpMenu must be declared in SilicaFlickable, SilicaListView or SilicaGridView
         PullDownMenu {
             MenuItem {
+                text: qsTr("Toggel allow key deletion")
+                onClicked: {
+                    if (allow_deletion === true) allow_deletion = false
+                    else allow_deletion = true
+                }
+            }
+            MenuItem {
                 text: qsTr("Add Key")
                 onClicked: {
                     var obj = pageStack.push(newKeyDialog)
@@ -70,9 +78,7 @@ Page {
 
         delegate: ListItem {
             function remove() {
-                console.log('remorse started');
                 remorseDelete(function() {
-                    console.log('issue deletion')
                     refresh_issued = true;
                     python.call('ykcon.ykcon.deleteKey', [model.cred['id']], function() {});
                     python.getKeys();
@@ -93,7 +99,12 @@ Page {
             menu: Component {
                 ContextMenu {
                     MenuItem {
-                        text: "Delete"
+                        text: qsTr("To clipboard")
+                        onClicked: Clipboard.text = model.code['value']
+                    }
+                    MenuItem {
+                        enabled: allow_deletion
+                        text: qsTr("Delete")
                         onClicked: remove()
                     }
                 }
@@ -150,9 +161,6 @@ Page {
                             python.getKeys();
                     }
                     } catch (e) {
-                        console.log("Error stack", e.stack);
-                        console.log("Error name", e.name);
-                        console.log("Error message", e.message);
                         codeElapsed.value = 0;
                         python.getKeys();
                     }
@@ -235,17 +243,17 @@ Page {
 
                  DialogHeader {
                      id: header
-                     title: "Add OATH TOTP Key"
+                     title: qsTr("Add OATH TOTP Key")
                  }
 
                  SectionHeader {
-                     text: "Credential details"
+                     text: qsTr("Credential details")
                  }
 
                  TextField {
                      id: nameField
                      focus: true
-                     label: "Name"
+                     label: qsTr("Name")
                      EnterKey.iconSource: "image://theme/icon-m-enter-next"
                      EnterKey.onClicked: secretField.focus = true
 
@@ -255,7 +263,7 @@ Page {
                  TextField {
                      id: secretField
                      focus: true
-                     label: "Secret"
+                     label: qsTr("Secret")
                      EnterKey.iconSource: "image://theme/icon-m-enter-next"
                      EnterKey.onClicked: issuerField.focus = true
 
@@ -263,13 +271,13 @@ Page {
                  }
 
                  SectionHeader {
-                     text: "Advanced (optional)"
+                     text: qsTr("Advanced (optional)")
                  }
 
                  TextField {
                      id: issuerField
                      focus: true
-                     label: "Issuer"
+                     label: qsTr("Issuer")
                      EnterKey.iconSource: "image://theme/icon-m-enter-close"
                      EnterKey.onClicked: focus = false
 
@@ -278,7 +286,7 @@ Page {
 
                  ComboBox {
                      id: cbxHashAlgo
-                     label: "Hash Algorythm:"
+                     label: qsTr("Hash Algorythm:")
                      width: parent.width
 
                      menu: ContextMenu {
