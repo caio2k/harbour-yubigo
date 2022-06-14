@@ -12,8 +12,8 @@ Page {
 
     property var keyName;
     property var secret;
-    property var hashAlgo: 'SHA1';
-    property var issuer: '';
+    property string hashAlgo: 'SHA1';
+    property string issuer: '';
 
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
@@ -96,7 +96,7 @@ Page {
                     onTriggered: {
                         try{
                             codeElapsed.value = 100*((keys[0]['code']['valid_to'] - new Date().getTime()/1000)/ (keys[0]['code']['valid_to'] - keys[0]['code']['valid_from']));
-                            if (codeElapsed.value <= 0 && refresh_issued == false) {
+                            if (codeElapsed.value <= 0 && refresh_issued === false) {
                                 refresh_issued = true;
                                 python.getKeys();
                         }
@@ -203,12 +203,18 @@ Page {
              Dialog {
 
                  onAccepted: {
+
                      keyName = nameField.text
                      secret = secretField.text
                      hashAlgo = cbxHashAlgo.currentItem.text
                      issuer = issuerField.text
 
-                     pageStack.replace(newKeyDialog_page2)
+                     refresh_issued = true;
+                     python.call('ykcon.ykcon.writeKey', [keyName, secret, hashAlgo, issuer], function() {});
+                     python.getKeys();
+
+                     // pageStack.replace(newKeyDialog_page2)
+
                  }
 
                  Column {
@@ -218,12 +224,6 @@ Page {
                      DialogHeader {
                          id: header
                          title: "Add OATH TOTP Key"
-                     }
-
-                     Label {
-                         text: "Unplug YubiKey to see Keyboard!"
-                         color: Theme.secondaryHighlightColor
-                         font.pixelSize: Theme.fontSizeLarge
                      }
 
                      SectionHeader {
@@ -279,6 +279,7 @@ Page {
             }
         }
 
+    /*
     Component {
              id: newKeyDialog_page2
              Dialog {
@@ -300,4 +301,5 @@ Page {
                 }
             }
         }
+    */
 }

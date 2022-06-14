@@ -9,11 +9,11 @@ Name:       harbour-yubigo
 # << macros
 
 Summary:    ykman GUI for SFOS
-Version:    0.2
-Release:    1
+Version:    0.3
+Release:    2
 Group:      Qt/Qt
-License:    LICENSE
-URL:        http://example.org/
+License:    GPL3
+URL:        https://github.com/fridlmue/harbour-yubigo
 Source0:    %{name}-%{version}.tar.bz2
 Source100:  harbour-yubigo.yaml
 Requires:   sailfishsilica-qt5 >= 0.10.9
