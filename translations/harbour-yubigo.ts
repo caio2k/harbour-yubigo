@@ -11,15 +11,15 @@
 <context>
     <name>FirstPage</name>
     <message>
+        <source>YUBIKEY OATH TOTP Keys</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Add Key</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Reload</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>YUBIKEY OATH TOTP Keys</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

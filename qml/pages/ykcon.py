@@ -1,6 +1,7 @@
 # This Python file uses the following encoding: utf-8
 
 # Some of the code may be taken from https://github.com/Yubico/yubioath-desktop/blob/main/py/yubikey.py
+# and https://github.com/Yubico/yubikey-manager/blob/main/ykman/cli/oath.py
 
 import pyotherside
 import json
@@ -23,22 +24,8 @@ class Ykcon:
     def __init__(self):
         pass
 
-    def _search(self, creds, query, show_hidden):
-        hits = []
-        for c in creds:
-            cred_id = _string_id(c)
-            if not show_hidden and is_hidden(c):
-                continue
-            if cred_id == query:
-                return [c]
-            if query.lower() in cred_id.lower():
-                hits.append(c)
-        return hits
-
     def getKeys(self):
-
         could_register = False
-
         for device, info in list_all_devices():
             # The info object provides details about the YubiKey
             if info.version >= (5, 0, 0):
@@ -74,8 +61,8 @@ class Ykcon:
             pyotherside.send('no_key')
 
     def writeKey(self, name, secret, hash_algo, issuer='', digits=6):
-
-        new_credentials = CredentialData(name,
+        new_credentials = CredentialData(
+            name,
             OATH_TYPE.TOTP,
             HASH_ALGORITHM.SHA1,
             parse_b32_key(secret)
@@ -96,6 +83,7 @@ class Ykcon:
                 )
                 with connection:
                     mySession = OathSession(connection)
+                    mySession.put_credential(credential_data=new_credentials)
 
     def deleteKey(self, name):
         for device, info in list_all_devices():
@@ -111,34 +99,13 @@ class Ykcon:
                     creds = mySession.list_credentials()
                     hits = _search(creds, name, True)
                     if len(hits) == 0:
-                        pyotherside.send("key_not_found")
+                        pyotherside.send("del:key_not_found")
                     elif len(hits) == 1:
                         cred = hits[0]
-                        session.delete_credential(cred.id)
-                        pyotherside.send(f"key_deleted:{name}")
-
-        _init_session(ctx, password, remember)
-        session = ctx.obj["session"]
-        creds = session.list_credentials()
-        hits = _search(creds, query, True)
-        if len(hits) == 0:
-            click.echo("No matches, nothing to be done.")
-        elif len(hits) == 1:
-            cred = hits[0]
-            if force or (
-                click.confirm(
-                    f"Delete account: {_string_id(cred)} ?",
-                    default=False,
-                    err=True,
-                )
-            ):
-                session.delete_credential(cred.id)
-                click.echo(f"Deleted {_string_id(cred)}.")
-            else:
-                click.echo("Deletion aborted by user.")
-
-        else:
-            _error_multiple_hits(ctx, hits)
+                        mySession.delete_credential(cred.id)
+                        pyotherside.send("del:succ")
+                    else:
+                        pyotherside.send("del:not_unique")
 
 def dumper(obj):
     """JSON serialization of bytes"""
@@ -148,5 +115,20 @@ def dumper(obj):
         return obj.toJSON()
     except:
         return obj.__dict__
+
+def _search(creds, query, show_hidden):
+    hits = []
+    for c in creds:
+        cred_id = _string_id(c)
+        # if not show_hidden and is_hidden(c):
+        #     continue
+        if cred_id == query:
+            return [c]
+        if query.lower() in cred_id.lower():
+            hits.append(c)
+    return hits
+
+def _string_id(credential):
+    return credential.id.decode("utf-8")
 
 ykcon = Ykcon()
