@@ -10,7 +10,7 @@ Name:       harbour-yubigo
 
 Summary:    ykman GUI for SFOS
 Version:    0.3
-Release:    2
+Release:    3
 Group:      Qt/Qt
 License:    GPL3
 URL:        https://github.com/fridlmue/harbour-yubigo
