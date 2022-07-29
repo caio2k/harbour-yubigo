@@ -11,19 +11,7 @@
 <context>
     <name>FirstPage</name>
     <message>
-        <source>YUBIKEY OATH TOTP Keys</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Add Key</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Reload</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Toggel allow key deletion</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -60,6 +48,22 @@
     </message>
     <message>
         <source>Hash Algorythm:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Toggle allow key deletion</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No Keys to show</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Insert a YubiKey with OAUTH keys and select Refresh in the pull down menu.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

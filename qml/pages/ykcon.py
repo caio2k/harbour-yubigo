@@ -24,6 +24,7 @@ class Ykcon:
     def __init__(self):
         pass
 
+
     def getKeys(self):
         could_register = False
         for device, info in list_all_devices():
@@ -47,6 +48,9 @@ class Ykcon:
                         codes.append(code_dct)
 
                     if len(codes) > 0:
+                        def order_per_cred(e):
+                          return e['cred']
+                        codes.sort(key=order_per_cred)
                         pyotherside.send(
                             'keys',
                             json.dumps(
